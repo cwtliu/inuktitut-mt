@@ -1,0 +1,64 @@
+# Modules needed
+
+# Functions
+def counter_line(line, unit):
+    """
+    Function returning length of line with respect to unit
+    Example: 'This is an apple'
+    Returns:    4 if unit == 'word'
+                13 if unit == 'char'
+    """
+    list = line.split(" ")
+    if unit == "word":
+        return len(list)
+    elif unit == "char":
+        # -4 due to \r\n at the end of each line
+        return sum(len(i) for i in list) - 2
+
+def parser(input_file, indices, path, language):
+    if language == "inuktitut":
+        output_inuktitut = open(path, "w")
+        line_index = 0
+        for line in input_file:
+            if line_index in indices:
+                output_inuktitut.write(line)
+            line_index += 1
+        output_inuktitut.close()
+    elif language == "english":
+        output_english = open(path, "w")
+        line_index = 0
+        for line in input_file:
+            if line_index in indices:
+                output_english.write(line)
+            line_index += 1
+        output_english.close()
+
+
+if __name__ == "__main__":
+    path = "cleaned_inuktitut_noascii.txt"
+    path_eng = "cleaned_english_noascii.txt"
+    input_file = open(path, "r")
+    first_line = 0
+    last_line = float("inf")
+    unit_type = "word"
+    nb_lines = 50000
+
+    line_index = 0
+    line_length = []
+    for line in input_file:
+        if line_index >= first_line and line_index <= last_line: #and line_index % 4 == 1:
+            length = counter_line(line, unit_type)
+            if length == 0:
+                print(line, "True")
+            line_length.append((line_index, length))
+        line_index += 1
+        if line_index > last_line:
+            break
+    #print("Length computed")
+    line_length.sort(key = lambda x: x[1])
+    indices = [line_length[i][0] for i in range(min(len(line_length), nb_lines))]
+    #print("Indices computed")
+    #print(indices)
+    parser(open(path, "r"), indices, "inuktitut_sentences.txt", "inuktitut")
+    parser(open(path_eng, "r"), indices, "english_sentences.txt", "english")
+    #print(Inuktitut & English done)
